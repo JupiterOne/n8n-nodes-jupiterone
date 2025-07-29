@@ -62,8 +62,18 @@ export class JupiterOneQuery implements INodeType {
 				},
 				default: '',
 				required: true,
-				description: 'The J1QL query to execute',
+				description: 'The J1QL query to execute (LIMIT will be automatically appended)',
 				placeholder: 'FIND jupiterone_account',
+			},
+			{
+				displayName: 'Limit',
+				name: 'limit',
+				type: 'number',
+				typeOptions: {
+					minValue: 1,
+				},
+				default: 50,
+				description: 'Max number of results to return',
 			},
 		],
 		credentials: [
@@ -90,7 +100,40 @@ export class JupiterOneQuery implements INodeType {
 				this.logger.info('🔍 Credentials type:', { type: typeof credentials });
 				this.logger.info('🔍 Credentials keys:', { keys: Object.keys(credentials || {}) });
 				
-				const query = this.getNodeParameter('query', i) as string;
+				const baseQuery = this.getNodeParameter('query', i) as string;
+				const limit = this.getNodeParameter('limit', i) as number;
+
+				// Validate limit value if specified
+				if (limit && limit > 250) {
+					this.logger.error(`❌ Limit value ${limit} exceeds maximum allowed value of 250`);
+					throw new NodeApiError(this.getNode(), {
+						message: `Limit value ${limit} exceeds maximum allowed value of 250. Please specify a limit between 1 and 250, or leave empty for all results.`,
+						description: 'JupiterOne API has a maximum limit of 250 results per query.'
+					});
+				}
+
+				// Handle LIMIT logic
+				let finalQuery = baseQuery.trim();
+				let appliedLimit: number | null = limit;
+				
+				if (!limit || limit <= 0) {
+					// If no limit specified, remove any existing LIMIT clause
+					finalQuery = finalQuery.replace(/LIMIT\s+\d+/i, '').trim();
+					appliedLimit = null;
+					this.logger.info(`🔍 No limit specified - removing LIMIT clause`);
+				} else {
+					// Apply the specified limit
+					if (!finalQuery.toLowerCase().includes('limit')) {
+						finalQuery += ` LIMIT ${limit}`;
+					} else {
+						// If LIMIT is already present, replace it with our limit
+						finalQuery = finalQuery.replace(/LIMIT\s+\d+/i, `LIMIT ${limit}`);
+					}
+				}
+
+				this.logger.info(`🔍 Base query: ${baseQuery}`);
+				this.logger.info(`🔍 Limit: ${appliedLimit || 'none (all results)'}`);
+				this.logger.info(`🔍 Final query: ${finalQuery}`);
 
 				const accountId = credentials.accountId as string;
 				const accessToken = credentials.accessToken as string;
@@ -111,7 +154,7 @@ export class JupiterOneQuery implements INodeType {
 					apiBaseUrlType: typeof credentials.apiBaseUrl
 				});
 				
-				this.logger.info(`🔍 Query to execute: ${query}`);
+				this.logger.info(`🔍 Query to execute: ${finalQuery}`);
 				this.logger.info(`🌐 GraphQL endpoint: ${graphqlEndpoint}`);
 
 				// Validate credentials before proceeding
@@ -129,7 +172,7 @@ export class JupiterOneQuery implements INodeType {
 				const graphqlQuery = {
 					query: QUERY_V1,
 					variables: {
-						query,
+						query: finalQuery,
 						deferredResponse: 'FORCE',
 						flags: { variableResultSize: true },
 						cursor: null,
@@ -164,7 +207,7 @@ export class JupiterOneQuery implements INodeType {
 				if (graphqlRes.errors) {
 					this.logger.error(`❌ GraphQL errors: ${JSON.stringify(graphqlRes.errors)}`);
 					throw new NodeApiError(this.getNode(), { 
-						message: `JupiterOne returned error(s) for query: '${query}'`,
+						message: `JupiterOne returned error(s) for query: '${finalQuery}'`,
 						description: JSON.stringify(graphqlRes.errors)
 					});
 				}
@@ -229,7 +272,9 @@ export class JupiterOneQuery implements INodeType {
 
 				returnData.push({
 					json: {
-						query,
+						query: finalQuery,
+						baseQuery,
+						limit: appliedLimit,
 						results,
 						timestamp: new Date().toISOString(),
 					},
@@ -245,6 +290,7 @@ export class JupiterOneQuery implements INodeType {
 					json: {
 						error: error instanceof Error ? error.message : 'Unknown error occurred',
 						query: this.getNodeParameter('query', i) as string,
+						limit: this.getNodeParameter('limit', i) as number || null,
 						timestamp: new Date().toISOString(),
 					},
 				});
