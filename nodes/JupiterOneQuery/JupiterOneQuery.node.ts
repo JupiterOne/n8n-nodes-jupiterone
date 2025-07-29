@@ -224,7 +224,7 @@ export class JupiterOneQuery implements INodeType {
 				}
 
 				// Step 2: Poll the deferred result URL until job is complete (using JupiterOne client logic)
-				const pollInterval = 100; // ms
+				const pollInterval = 1000; // ms
 				const startTime = Date.now();
 				let statusFile: any; // JupiterOne result status file (dynamic shape)
 				let status: string = JobStatus.IN_PROGRESS;
