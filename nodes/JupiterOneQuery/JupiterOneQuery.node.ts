@@ -91,209 +91,138 @@ export class JupiterOneQuery implements INodeType {
 		this.logger.info('🚀 JupiterOne Query Node: Starting execution');
 		this.logger.info(`📊 Input items count: ${items.length}`);
 
+		const MAX_LIMIT = 10000;
+
 		for (let i = 0; i < items.length; i++) {
 			try {
 				this.logger.info(`🔄 Processing item ${i + 1}/${items.length}`);
 				
 				const credentials = await this.getCredentials('jupiteroneApi');
-				this.logger.info('🔍 Raw credentials object:', { credentials: JSON.stringify(credentials, null, 2) });
-				this.logger.info('🔍 Credentials type:', { type: typeof credentials });
-				this.logger.info('🔍 Credentials keys:', { keys: Object.keys(credentials || {}) });
-				
-				const baseQuery = this.getNodeParameter('query', i) as string;
-				const limit = this.getNodeParameter('limit', i) as number;
-
-				// Validate limit value if specified
-				if (limit && limit > 250) {
-					this.logger.error(`❌ Limit value ${limit} exceeds maximum allowed value of 250`);
-					throw new NodeApiError(this.getNode(), {
-						message: `Limit value ${limit} exceeds maximum allowed value of 250. Please specify a limit between 1 and 250, or leave empty for all results.`,
-						description: 'JupiterOne API has a maximum limit of 250 results per query.'
-					});
-				}
-
-				// Handle LIMIT logic
-				let finalQuery = baseQuery.trim();
-				let appliedLimit: number | null = limit;
-				
-				if (!limit || limit <= 0) {
-					// If no limit specified, remove any existing LIMIT clause
-					finalQuery = finalQuery.replace(/LIMIT\s+\d+/i, '').trim();
-					appliedLimit = null;
-					this.logger.info(`🔍 No limit specified - removing LIMIT clause`);
-				} else {
-					// Apply the specified limit
-					if (!finalQuery.toLowerCase().includes('limit')) {
-						finalQuery += ` LIMIT ${limit}`;
-					} else {
-						// If LIMIT is already present, replace it with our limit
-						finalQuery = finalQuery.replace(/LIMIT\s+\d+/i, `LIMIT ${limit}`);
-					}
-				}
-
-				this.logger.info(`🔍 Base query: ${baseQuery}`);
-				this.logger.info(`🔍 Limit: ${appliedLimit || 'none (all results)'}`);
-				this.logger.info(`🔍 Final query: ${finalQuery}`);
-
 				const accountId = credentials.accountId as string;
 				const accessToken = credentials.accessToken as string;
 				const apiBaseUrl = (credentials.apiBaseUrl as string) || 'https://api.us.jupiterone.io';
 				const graphqlEndpoint = `${apiBaseUrl.replace(/\/$/, '')}/graphql`;
 
-				this.logger.info('🔑 Credentials loaded:', {
-					accountId: credentials.accountId,
-					apiBaseUrl: credentials.apiBaseUrl,
-					hasAccessToken: !!credentials.accessToken
-				});
-				this.logger.info('🔍 Individual credential values:', {
-					accountId: credentials.accountId,
-					accountIdType: typeof credentials.accountId,
-					accessTokenPresent: !!credentials.accessToken,
-					accessTokenType: typeof credentials.accessToken,
-					apiBaseUrl: credentials.apiBaseUrl,
-					apiBaseUrlType: typeof credentials.apiBaseUrl
-				});
-				
-				this.logger.info(`🔍 Query to execute: ${finalQuery}`);
-				this.logger.info(`🌐 GraphQL endpoint: ${graphqlEndpoint}`);
-
-				// Validate credentials before proceeding
-				if (!accountId || !accessToken) {
-					this.logger.error('❌ Missing required credentials:');
-					this.logger.error(`  - accountId: ${accountId ? 'present' : 'missing'}`);
-					this.logger.error(`  - accessToken: ${accessToken ? 'present' : 'missing'}`);
+				let baseQuery = this.getNodeParameter('query', i) as string;
+				let limit = this.getNodeParameter('limit', i) as number | undefined;
+				if (!limit || isNaN(limit)) {
+					limit = MAX_LIMIT;
+				}
+				if (limit > MAX_LIMIT) {
 					throw new NodeApiError(this.getNode(), {
-						message: 'Missing required JupiterOne credentials. Please check your account ID and API token.',
-						description: 'Both account ID and API token are required to authenticate with JupiterOne.'
+						message: `Limit value ${limit} exceeds maximum allowed value of ${MAX_LIMIT}. Please specify a limit between 1 and ${MAX_LIMIT}, or leave empty for all results.`,
+						description: `JupiterOne n8n node has a maximum limit of ${MAX_LIMIT} results per query.`
 					});
 				}
-
-				// Step 1: Send the J1QL query as a GraphQL request (using JupiterOne client logic)
-				const graphqlQuery = {
-					query: QUERY_V1,
-					variables: {
-						query: finalQuery,
-						deferredResponse: 'FORCE',
-						flags: { variableResultSize: true },
-						cursor: null,
-					},
-				};
-
-				this.logger.info(`📤 GraphQL query object: ${JSON.stringify(graphqlQuery, null, 2)}`);
-
-				const headers = {
-					'Authorization': `Bearer ${accessToken}`,
-					'JupiterOne-Account': accountId,
-					'content-type': 'application/json',
-				};
-
-				this.logger.info('📋 Request headers:', {
-					'Authorization': 'Bearer [REDACTED]',
-					'JupiterOne-Account': accountId,
-					'content-type': 'application/json',
-				});
-
-				this.logger.info('📡 Making GraphQL request...');
-				const graphqlRes = await this.helpers.httpRequest.call(this, {
-					url: graphqlEndpoint,
-					method: 'POST',
-					headers,
-					body: JSON.stringify(graphqlQuery),
-					json: true,
-				});
-
-				this.logger.info(`📥 GraphQL response received: ${JSON.stringify(graphqlRes, null, 2)}`);
-
-				if (graphqlRes.errors) {
-					this.logger.error(`❌ GraphQL errors: ${JSON.stringify(graphqlRes.errors)}`);
-					throw new NodeApiError(this.getNode(), { 
-						message: `JupiterOne returned error(s) for query: '${finalQuery}'`,
-						description: JSON.stringify(graphqlRes.errors)
-					});
-				}
-
-				const deferredUrl = graphqlRes?.data?.queryV1?.url;
-				this.logger.info(`🔗 Deferred URL: ${deferredUrl}`);
-				
-				if (!deferredUrl) {
-					this.logger.error('❌ No deferred URL in response');
-					throw new NodeApiError(this.getNode(), { 
-						message: 'No deferred result URL returned from JupiterOne.',
-						description: `Response: ${JSON.stringify(graphqlRes)}`
-					});
-				}
-
-				// Step 2: Poll the deferred result URL until job is complete (using JupiterOne client logic)
-				const pollInterval = 1000; // ms
-				const startTime = Date.now();
-				let statusFile: any; // JupiterOne result status file (dynamic shape)
-				let status: string = JobStatus.IN_PROGRESS;
+				// Remove any LIMIT clause from the query
+				baseQuery = baseQuery.replace(/LIMIT\s+\d+/i, '').trim();
 				let results: any[] = [];
-
-				this.logger.info('⏳ Starting to poll for results...');
-
-				while (status === JobStatus.IN_PROGRESS) {
-					if (Date.now() - startTime > QUERY_RESULTS_TIMEOUT) {
-						this.logger.error('⏰ Polling timeout exceeded');
-						throw new NodeApiError(this.getNode(), { 
-							message: `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT / 1000} seconds.`
-						});
-					}
+				let cursor: string | null = null;
+				let page = 0;
+				let done = false;
+				while (!done && results.length < limit) {
+					page++;
+					this.logger.info(`📄 Processing page ${page}, current results: ${results.length}, target limit: ${limit}`);
 					
-					// Simple delay using busy wait (adapted from JupiterOne client)
-					const delayStart = Date.now();
-					while (Date.now() - delayStart < pollInterval) {
-						// Wait for pollInterval milliseconds
-					}
-					
-					this.logger.info('🔄 Polling for results...');
-					const pollRes = await this.helpers.httpRequest.call(this, {
-						url: deferredUrl,
-						method: 'GET',
+					// Prepare GraphQL query
+					const graphqlQuery = {
+						query: QUERY_V1,
+						variables: {
+							query: baseQuery,
+							deferredResponse: 'FORCE',
+							cursor,
+						},
+					};
+
+					this.logger.info(`📤 GraphQL query object: ${JSON.stringify(graphqlQuery, null, 2)}`);
+
+					const headers = {
+						'Authorization': `Bearer ${accessToken}`,
+						'JupiterOne-Account': accountId,
+						'content-type': 'application/json',
+					};
+
+					this.logger.info('📋 Request headers:', {
+						'Authorization': 'Bearer [REDACTED]',
+						'JupiterOne-Account': accountId,
+						'content-type': 'application/json',
+					});
+
+					this.logger.info('📡 Making GraphQL request...');
+					const graphqlRes = await this.helpers.httpRequest.call(this, {
+						url: graphqlEndpoint,
+						method: 'POST',
 						headers,
+						body: JSON.stringify(graphqlQuery),
 						json: true,
 					});
-					statusFile = pollRes as any;
-					status = statusFile.status;
-					this.logger.info(`📊 Poll response status: ${status}`);
-					this.logger.info(`📄 Poll response data: ${JSON.stringify(statusFile, null, 2)}`);
+
+					this.logger.info(`📥 GraphQL response received: ${JSON.stringify(graphqlRes, null, 2)}`);
+
+					if (graphqlRes.errors) {
+						this.logger.error(`❌ GraphQL errors: ${JSON.stringify(graphqlRes.errors)}`);
+						throw new NodeApiError(this.getNode(), { 
+							message: `JupiterOne returned error(s) for query: '${baseQuery}'`,
+							description: JSON.stringify(graphqlRes.errors)
+						});
+					}
+
+					const deferredUrl = graphqlRes?.data?.queryV1?.url;
+					if (!deferredUrl) {
+						throw new NodeApiError(this.getNode(), {
+							message: 'No deferred result URL returned from JupiterOne.',
+							description: `Response: ${JSON.stringify(graphqlRes)}`
+						});
+					}
+					// Poll for results
+					const pollInterval = 1000; // ms
+					const startTime = Date.now();
+					let statusFile: any;
+					let status: string = JobStatus.IN_PROGRESS;
+					while (status === JobStatus.IN_PROGRESS) {
+						if (Date.now() - startTime > QUERY_RESULTS_TIMEOUT) {
+							throw new NodeApiError(this.getNode(), {
+								message: `Exceeded request timeout of ${QUERY_RESULTS_TIMEOUT / 1000} seconds.`
+							});
+						}
+						const delayStart = Date.now();
+						while (Date.now() - delayStart < pollInterval) {}
+						const pollRes = await this.helpers.httpRequest.call(this, {
+							url: deferredUrl,
+							method: 'GET',
+							headers,
+							json: true,
+						});
+						statusFile = pollRes as any;
+						status = statusFile.status;
+					}
+					if (status === JobStatus.FAILED) {
+						throw new NodeApiError(this.getNode(), {
+							message: `JupiterOne returned error(s) for query: '${statusFile.error}'`
+						});
+					}
+					const pageResults = statusFile?.data || [];
+					results = results.concat(pageResults);
+					cursor = statusFile?.cursor || null;
+					
+					this.logger.info(`📊 Page ${page} results: ${pageResults.length}, total results: ${results.length}, cursor: ${cursor ? 'present' : 'null'}`);
+					
+					// Stop if no more results or we've reached the limit or no cursor
+					if (!cursor || pageResults.length === 0 || results.length >= limit) {
+						this.logger.info(`🛑 Stopping pagination: !cursor=${!cursor}, pageResults.length===0=${pageResults.length === 0}, results.length>=limit=${results.length >= limit}`);
+						done = true;
+					}
 				}
-
-				if (status === JobStatus.FAILED) {
-					this.logger.error(`❌ Query failed: ${statusFile.error}`);
-					throw new NodeApiError(this.getNode(), { 
-						message: `JupiterOne returned error(s) for query: '${statusFile.error}'`
-					});
-				}
-
-				results = statusFile?.data || [];
-				this.logger.info('✅ Query completed successfully');
-				this.logger.info(`📈 Results count: ${results.length}`);
-
-				returnData.push({
-					json: {
-						query: finalQuery,
-						baseQuery,
-						limit: appliedLimit,
-						results,
-						timestamp: new Date().toISOString(),
-					},
-				});
+				// After the loop, slice results to the requested limit
+				returnData.push({ json: { results: results.slice(0, limit), limit, baseQuery } });
 				this.logger.info('✅ Item processed successfully');
-			} catch (error) {
-				this.logger.error('❌ Error in JupiterOne Query Node:', error);
-				if (error instanceof Error) {
-					this.logger.error(`❌ Error message: ${error.message}`);
-					this.logger.error(`❌ Error stack: ${error.stack}`);
+			} catch (err) {
+				this.logger.error('❌ Error in JupiterOne Query Node:', err);
+				if (err instanceof Error) {
+					this.logger.error(`❌ Error message: ${err.message}`);
+					this.logger.error(`❌ Error stack: ${err.stack}`);
 				}
-				returnData.push({
-					json: {
-						error: error instanceof Error ? error.message : 'Unknown error occurred',
-						query: this.getNodeParameter('query', i) as string,
-						limit: this.getNodeParameter('limit', i) as number || null,
-						timestamp: new Date().toISOString(),
-					},
-				});
+				returnData.push({ json: { error: err.message, limit: this.getNodeParameter('limit', i) as number || null } });
 			}
 		}
 

@@ -41,7 +41,7 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 1. Add the JupiterOne Query node to your workflow.
 2. Create and select your JupiterOne credentials.
 3. Enter your J1QL query (e.g., `FIND jupiterone_account`).
-4. Set the limit for maximum results (optional, default: 50, max: 250, leave empty for all results).
+4. Set the limit for maximum results (optional, min: 1, max: 10,000, leave empty for all results).
 5. Execute the workflow to retrieve results from JupiterOne.
 
 **Note**: The LIMIT clause is automatically appended to your query. If your query already contains a LIMIT, it will be replaced with the specified limit value. If no limit is specified, any existing LIMIT clause will be removed to return all results.
