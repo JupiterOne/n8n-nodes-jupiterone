@@ -119,8 +119,7 @@ export class JupiterOneQuery implements INodeType {
 				let results: any[] = [];
 				let cursor: string | null = null;
 				let page = 0;
-				let done = false;
-				while (!done && results.length < limit) {
+				while (results.length < limit) {
 					page++;
 					this.logger.info(`📄 Processing page ${page}, current results: ${results.length}, target limit: ${limit}`);
 					
@@ -210,12 +209,11 @@ export class JupiterOneQuery implements INodeType {
 					// Stop if no more results or we've reached the limit or no cursor
 					if (!cursor || pageResults.length === 0 || results.length >= limit) {
 						this.logger.info(`🛑 Stopping pagination: !cursor=${!cursor}, pageResults.length===0=${pageResults.length === 0}, results.length>=limit=${results.length >= limit}`);
-						done = true;
+						returnData.push({ json: { results: results.slice(0, limit), limit, baseQuery } });
+						this.logger.info('✅ Item processed successfully');
+						break;
 					}
 				}
-				// After the loop, slice results to the requested limit
-				returnData.push({ json: { results: results.slice(0, limit), limit, baseQuery } });
-				this.logger.info('✅ Item processed successfully');
 			} catch (err) {
 				this.logger.error('❌ Error in JupiterOne Query Node:', err);
 				if (err instanceof Error) {
