@@ -1,0 +1,11 @@
+name: Canary Release
+
+on:
+  issue_comment:
+    types:
+      - created
+
+jobs:
+  canary-release:
+    uses: jupiterone/github-internal/.github/workflows/npm-canary-release.yaml@v1
+    secrets: inherit
