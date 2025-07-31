@@ -1,3 +1,16 @@
+# v0.1.3 (Thu Jul 31 2025)
+
+#### 🐛 Bug Fix
+
+- [SWB-1] Added JupiterOne Webhook Node [#3](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/3) ([@suraj-sella](https://github.com/suraj-sella) [@jmountifield](https://github.com/jmountifield))
+
+#### Authors: 2
+
+- James Mountifield ([@jmountifield](https://github.com/jmountifield))
+- Suraj Selladurai ([@suraj-sella](https://github.com/suraj-sella))
+
+---
+
 # v0.1.2 (Wed Jul 30 2025)
 
 #### 🐛 Bug Fix
