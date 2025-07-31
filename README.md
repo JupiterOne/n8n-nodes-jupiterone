@@ -73,7 +73,7 @@ To obtain your API token, log in to JupiterOne and generate an access token from
   - Added JupiterOne Webhook node for receiving rule alerts and security events
 
 - 0.1.2
-  - Enabled Github Actions
+  - Internal update - no customer impacting changes. 
 
 - 0.1.1
   - Initial release: JupiterOne Query node for running J1QL queries
