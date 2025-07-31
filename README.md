@@ -20,7 +20,8 @@ Follow the [installation guide](https://docs.n8n.io/integrations/community-nodes
 
 ## Operations
 
-- Run J1QL queries against your JupiterOne account with automatic LIMIT handling
+- **JupiterOne Query**: Run J1QL queries against your JupiterOne account with automatic LIMIT handling
+- **JupiterOne Webhook**: Listen for JupiterOne rule alerts and security events
 
 ## Credentials
 
@@ -38,6 +39,8 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 
 ## Usage
 
+### JupiterOne Query Node
+
 1. Add the JupiterOne Query node to your workflow.
 2. Create and select your JupiterOne credentials.
 3. Enter your J1QL query (e.g., `FIND jupiterone_account`).
@@ -45,6 +48,18 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 5. Execute the workflow to retrieve results from JupiterOne.
 
 **Note**: The LIMIT clause is automatically appended to your query. If your query already contains a LIMIT, it will be replaced with the specified limit value. If no limit is specified, any existing LIMIT clause will be removed to return all results.
+
+### JupiterOne Webhook Node
+
+1. Add the JupiterOne Webhook node to your workflow as a trigger.
+2. Configure authentication (optional):
+   - Select "Header Token" for authentication
+   - Set a webhook secret and header name
+3. Copy the webhook URL provided by n8n.
+4. Configure your JupiterOne rule to send webhooks to this URL.
+5. The node will automatically trigger when JupiterOne sends webhook events.
+
+**Note**: The webhook node processes incoming webhook payloads and structures the data for use in downstream nodes. It supports both authenticated and unauthenticated webhooks.
 
 ## Resources
 
@@ -54,5 +69,11 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 
 ## Version history
 
-- 0.1.0
+- 0.1.3
+  - Added JupiterOne Webhook node for receiving rule alerts and security events
+
+- 0.1.2
+  - Internal update - no customer impacting changes. 
+
+- 0.1.1
   - Initial release: JupiterOne Query node for running J1QL queries

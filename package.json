@@ -36,7 +36,8 @@
       "dist/credentials/JupiterOneApi.credentials.js"
     ],
     "nodes": [
-      "dist/nodes/JupiterOneQuery/JupiterOneQuery.node.js"
+      "dist/nodes/JupiterOneQuery/JupiterOneQuery.node.js",
+      "dist/nodes/JupiterOneWebhook/JupiterOneWebhook.node.js"
     ]
   },
   "devDependencies": {
