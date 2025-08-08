@@ -12,7 +12,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          token: ${{ secrets.AUTO_GITHUB_PAT_TOKEN }}
+          fetch-depth: 0
       - name: Authenticate with private NPM package
         run: echo "//registry.npmjs.org/:_authToken=\$NPM_AUTH_TOKEN" > ~/.npmrc
 
