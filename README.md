@@ -69,6 +69,9 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 
 ## Version history
 
+- 0.1.4
+  - Added Credential Test for J1 API
+
 - 0.1.3
   - Added JupiterOne Webhook node for receiving rule alerts and security events
 

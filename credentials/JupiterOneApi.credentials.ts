@@ -1,4 +1,4 @@
-import { IAuthenticateGeneric, ICredentialType, INodeProperties, Icon } from 'n8n-workflow';
+import { IAuthenticateGeneric, ICredentialType, INodeProperties, Icon, ICredentialTestRequest } from 'n8n-workflow';
 
 export class JupiterOneApi implements ICredentialType {
   name = 'jupiteroneApi';
@@ -42,6 +42,20 @@ export class JupiterOneApi implements ICredentialType {
       headers: {
         Authorization: 'Bearer {{ $credentials.accessToken }}',
         'Content-Type': 'application/json',
+      },
+    },
+  };
+
+  test: ICredentialTestRequest = {
+    request: {
+      baseURL: '={{ $credentials.apiBaseUrl }}',
+      url: '/graphql',
+      method: 'POST',
+      headers: {
+        'JupiterOne-Account': '={{ $credentials.accountId }}',
+      },
+      body: {
+        query: 'query TestQuery { queryV1(query: "FIND jupiterone_account LIMIT 1") { type data url } }',
       },
     },
   };
