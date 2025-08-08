@@ -8,7 +8,7 @@ on:
 jobs:
   validate:
     name: Validate
-    runs-on: scaleset-jupiterone-infra-arm64
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
