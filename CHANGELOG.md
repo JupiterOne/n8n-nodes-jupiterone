@@ -1,3 +1,19 @@
+# v0.1.4 (Fri Aug 08 2025)
+
+#### 🐛 Bug Fix
+
+- Release 2 [#7](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/7) ([@Sivli-Embir](https://github.com/Sivli-Embir))
+- release - remove validate [#6](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/6) ([@Sivli-Embir](https://github.com/Sivli-Embir))
+- Fix NPM deploy [#5](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/5) ([@Sivli-Embir](https://github.com/Sivli-Embir))
+- feat: add credential test for JupiterOne API [#4](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/4) ([@suraj-sella](https://github.com/suraj-sella))
+
+#### Authors: 2
+
+- Sivli Embir ([@Sivli-Embir](https://github.com/Sivli-Embir))
+- Suraj Selladurai ([@suraj-sella](https://github.com/suraj-sella))
+
+---
+
 # v0.1.3 (Thu Jul 31 2025)
 
 #### 🐛 Bug Fix
