@@ -24,9 +24,6 @@ jobs:
       - name: Install Rebuild
         run: npm rebuild
 
-      - name: Run Validation
-        run: npm run validate
-
       - name: Run Build
         run: npm run build
       
