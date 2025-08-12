@@ -4,7 +4,7 @@ export class JupiterOneApi implements ICredentialType {
   name = 'jupiteroneApi';
   displayName = 'JupiterOne API';
   icon = 'file:jupiterone.svg' as Icon;
-  documentationUrl = 'https://docs.jupiterone.io/integrations';
+  documentationUrl = 'https://docs.jupiterone.io/integrations/outbound-directory/n8n-community-node';
 
   properties: INodeProperties[] = [
     {
