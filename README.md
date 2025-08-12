@@ -64,10 +64,14 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 ## Resources
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-* [JupiterOne documentation](https://docs.jupiterone.io/)
+* [JupiterOne n8n documentation](https://docs.jupiterone.io/integrations/outbound-directory/n8n-community-node)
 * [J1QL query language reference](https://docs.jupiterone.io/jupiterone-query-language/)
 
 ## Version history
+
+
+- 0.1.5
+  - Removed Credential Test for J1 API
 
 - 0.1.4
   - Added Credential Test for J1 API
