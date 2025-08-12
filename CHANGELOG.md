@@ -1,3 +1,16 @@
+# v0.1.5 (Tue Aug 12 2025)
+
+#### 🐛 Bug Fix
+
+- SWB-75 docs: update JupiterOne docs link and remove test credentials [#8](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/8) ([@suraj-sella](https://github.com/suraj-sella) [@jmountifield](https://github.com/jmountifield))
+
+#### Authors: 2
+
+- James Mountifield ([@jmountifield](https://github.com/jmountifield))
+- Suraj Selladurai ([@suraj-sella](https://github.com/suraj-sella))
+
+---
+
 # v0.1.4 (Fri Aug 08 2025)
 
 #### 🐛 Bug Fix
