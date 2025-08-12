@@ -48,15 +48,17 @@ export class JupiterOneApi implements ICredentialType {
 
   test: ICredentialTestRequest = {
     request: {
-      baseURL: '={{ $credentials.apiBaseUrl }}',
+      baseURL: '={{ $credentials.apiBaseUrl || "https://api.us.jupiterone.io" }}',
       url: '/graphql',
       method: 'POST',
       headers: {
+        'Authorization': '={{ "Bearer " + $credentials.accessToken }}',
         'JupiterOne-Account': '={{ $credentials.accountId }}',
+        'Content-Type': 'application/json',
       },
-      body: {
+      body: JSON.stringify({
         query: 'query TestQuery { queryV1(query: "FIND jupiterone_account LIMIT 1") { type data url } }',
-      },
+      }),
     },
   };
 }
