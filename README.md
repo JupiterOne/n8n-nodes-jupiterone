@@ -64,7 +64,7 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 ## Resources
 
 * [n8n community nodes documentation](https://docs.n8n.io/integrations/#community-nodes)
-* [JupiterOne documentation](https://docs.jupiterone.io/)
+* [JupiterOne n8n documentation](https://docs.jupiterone.io/integrations/outbound-directory/n8n)
 * [J1QL query language reference](https://docs.jupiterone.io/jupiterone-query-language/)
 
 ## Version history
