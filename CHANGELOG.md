@@ -1,3 +1,15 @@
+# v0.1.6 (Thu Aug 14 2025)
+
+#### 🐛 Bug Fix
+
+- [SWB-75]-Fixed n8n Test Credential Logic [#9](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/9) ([@suraj-sella](https://github.com/suraj-sella))
+
+#### Authors: 1
+
+- Suraj Selladurai ([@suraj-sella](https://github.com/suraj-sella))
+
+---
+
 # v0.1.5 (Tue Aug 12 2025)
 
 #### 🐛 Bug Fix
