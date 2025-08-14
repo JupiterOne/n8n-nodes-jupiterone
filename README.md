@@ -69,6 +69,8 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 
 ## Version history
 
+- 0.1.6
+  - Fixed Test Credential Logic, Added copilot-instructions.md
 
 - 0.1.5
   - Removed Credential Test for J1 API
