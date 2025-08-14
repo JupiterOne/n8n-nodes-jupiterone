@@ -47,7 +47,7 @@ export class JupiterOneApi implements ICredentialType {
     type: 'generic',
     properties: {
       headers: {
-        Authorization: `=Bearer {{ $credentials.accessToken }}`,
+        Authorization: '=Bearer {{ $credentials.accessToken }}',
         'Content-Type': 'application/json',
       },
     },
@@ -61,7 +61,10 @@ export class JupiterOneApi implements ICredentialType {
         'JupiterOne-Account': '={{ $credentials.accountId }}',
         'Content-Type': 'application/json',
       },
-      body: '{"query":"query TestQuery { __typename }","variables":{}}',
+      body: JSON.stringify({
+        query: 'query TestQuery { __typename }',
+        variables: {},
+      }),
     },
   };
 }
