@@ -100,7 +100,7 @@ export class JupiterOneQuery implements INodeType {
         const credentials = await this.getCredentials('jupiteroneApi');
         const accountId = credentials.accountId as string;
         const accessToken = credentials.accessToken as string;
-        const apiBaseUrl = (credentials.apiBaseUrl as string) || 'https://api.us.jupiterone.io';
+        const apiBaseUrl = credentials.apiBaseUrl as string;
         const graphqlEndpoint = `${apiBaseUrl.replace(/\/$/, '')}/graphql`;
 
         let baseQuery = this.getNodeParameter('query', i) as string;

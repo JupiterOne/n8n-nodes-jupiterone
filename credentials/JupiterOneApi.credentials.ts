@@ -1,10 +1,17 @@
-import { IAuthenticateGeneric, ICredentialType, INodeProperties, Icon } from 'n8n-workflow';
+import {
+  IAuthenticateGeneric,
+  ICredentialType,
+  INodeProperties,
+  Icon,
+  ICredentialTestRequest,
+} from 'n8n-workflow';
 
 export class JupiterOneApi implements ICredentialType {
   name = 'jupiteroneApi';
   displayName = 'JupiterOne API';
   icon = 'file:jupiterone.svg' as Icon;
-  documentationUrl = 'https://docs.jupiterone.io/integrations/outbound-directory/n8n-community-node';
+  documentationUrl =
+    'https://docs.jupiterone.io/integrations/outbound-directory/n8n-community-node';
 
   properties: INodeProperties[] = [
     {
@@ -40,9 +47,21 @@ export class JupiterOneApi implements ICredentialType {
     type: 'generic',
     properties: {
       headers: {
-        Authorization: 'Bearer {{ $credentials.accessToken }}',
+        Authorization: `=Bearer {{ $credentials.accessToken }}`,
         'Content-Type': 'application/json',
       },
+    },
+  };
+
+  test: ICredentialTestRequest = {
+    request: {
+      method: 'POST',
+      url: '={{ $credentials.apiBaseUrl }}/graphql',
+      headers: {
+        'JupiterOne-Account': '={{ $credentials.accountId }}',
+        'Content-Type': 'application/json',
+      },
+      body: '{"query":"query TestQuery { __typename }","variables":{}}',
     },
   };
 }
