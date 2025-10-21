@@ -1,3 +1,15 @@
+# v0.1.7 (Tue Oct 21 2025)
+
+#### 🐛 Bug Fix
+
+- Implemented Feedback from n8n on our node [#10](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/10) ([@suraj-sella](https://github.com/suraj-sella))
+
+#### Authors: 1
+
+- Suraj Selladurai ([@suraj-sella](https://github.com/suraj-sella))
+
+---
+
 # v0.1.6 (Thu Aug 14 2025)
 
 #### 🐛 Bug Fix
