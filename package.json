@@ -1,6 +1,6 @@
 {
   "name": "n8n-nodes-jupiterone",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "n8n community nodes for JupiterOne - Run J1QL queries against your JupiterOne account",
   "keywords": [
     "n8n-community-node-package"
