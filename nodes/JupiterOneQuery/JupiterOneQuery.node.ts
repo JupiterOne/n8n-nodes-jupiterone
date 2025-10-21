@@ -215,7 +215,10 @@ export class JupiterOneQuery implements INodeType {
             this.logger.info(
               `🛑 Stopping pagination: !cursor=${!cursor}, pageResults.length===0=${pageResults.length === 0}, results.length>=limit=${results.length >= limit}`,
             );
-            returnData.push({ json: { results: results.slice(0, limit), limit, baseQuery } });
+            returnData.push({
+              json: { results: results.slice(0, limit), limit, baseQuery },
+              pairedItem: { item: i },
+            });
             this.logger.info('✅ Item processed successfully');
             break;
           }
@@ -226,12 +229,18 @@ export class JupiterOneQuery implements INodeType {
           this.logger.error(`❌ Error message: ${err.message}`);
           this.logger.error(`❌ Error stack: ${err.stack}`);
         }
-        returnData.push({
-          json: {
-            error: err.message,
-            limit: (this.getNodeParameter('limit', i) as number) || null,
-          },
-        });
+
+        if (this.continueOnFail()) {
+          returnData.push({
+            json: {
+              error: err.message,
+              limit: (this.getNodeParameter('limit', i) as number) || null,
+            },
+            pairedItem: { item: i },
+          });
+        } else {
+          throw err;
+        }
       }
     }
 
