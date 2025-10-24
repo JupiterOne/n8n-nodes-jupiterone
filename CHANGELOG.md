@@ -1,3 +1,15 @@
+# v0.1.8 (Fri Oct 24 2025)
+
+#### 🐛 Bug Fix
+
+- Refactor JupiterOne Query and Webhook nodes [#11](https://github.com/JupiterOne/n8n-nodes-jupiterone/pull/11) ([@suraj-sella](https://github.com/suraj-sella))
+
+#### Authors: 1
+
+- Suraj Selladurai ([@suraj-sella](https://github.com/suraj-sella))
+
+---
+
 # v0.1.7 (Tue Oct 21 2025)
 
 #### 🐛 Bug Fix
