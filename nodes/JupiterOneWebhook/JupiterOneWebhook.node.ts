@@ -72,14 +72,9 @@ export class JupiterOneWebhook implements INodeType {
   async webhook(this: IWebhookFunctions): Promise<IWebhookResponseData> {
     const authentication = this.getNodeParameter('authentication') as string;
 
-    this.logger.info('🚀 JupiterOne Webhook: Received webhook request');
-
     // Get the request body and headers
     const body = this.getBodyData();
     const headers = this.getHeaderData();
-
-    this.logger.info('📋 Webhook headers:', { headers: JSON.stringify(headers, null, 2) });
-    this.logger.info('📦 Webhook body:', { body: JSON.stringify(body, null, 2) });
 
     // Handle authentication if enabled
     if (authentication === 'header') {
@@ -107,8 +102,6 @@ export class JupiterOneWebhook implements INodeType {
           },
         };
       }
-
-      this.logger.info('✅ Authentication successful');
     }
 
     // Validate webhook payload structure
@@ -151,9 +144,6 @@ export class JupiterOneWebhook implements INodeType {
 
     // Include any other fields that might be present
     Object.assign(webhookData, otherFields);
-
-    this.logger.info('✅ Webhook processed successfully');
-    this.logger.info('📊 Processed data:', { data: JSON.stringify(webhookData, null, 2) });
 
     return {
       webhookResponse: {
