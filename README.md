@@ -69,6 +69,9 @@ To obtain your API token, log in to JupiterOne and generate an access token from
 
 ## Version history
 
+- 0.1.8
+  - Removed development logger.info calls to improve production performance
+
 - 0.1.7
   - Fixed item linking in execute() method to maintain item lineage
   - Added continueOnFail error handling for proper workflow error management
