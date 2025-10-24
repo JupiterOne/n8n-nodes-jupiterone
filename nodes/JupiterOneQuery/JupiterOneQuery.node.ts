@@ -88,15 +88,10 @@ export class JupiterOneQuery implements INodeType {
     const items = this.getInputData();
     const returnData: INodeExecutionData[] = [];
 
-    this.logger.info('🚀 JupiterOne Query Node: Starting execution');
-    this.logger.info(`📊 Input items count: ${items.length}`);
-
     const MAX_LIMIT = 10000;
 
     for (let i = 0; i < items.length; i++) {
       try {
-        this.logger.info(`🔄 Processing item ${i + 1}/${items.length}`);
-
         const credentials = await this.getCredentials('jupiteroneApi');
         const accountId = credentials.accountId as string;
         const accessToken = credentials.accessToken as string;
@@ -121,9 +116,6 @@ export class JupiterOneQuery implements INodeType {
         let page = 0;
         while (results.length < limit) {
           page++;
-          this.logger.info(
-            `📄 Processing page ${page}, current results: ${results.length}, target limit: ${limit}`,
-          );
 
           // Prepare GraphQL query
           const graphqlQuery = {
@@ -135,21 +127,12 @@ export class JupiterOneQuery implements INodeType {
             },
           };
 
-          this.logger.info(`📤 GraphQL query object: ${JSON.stringify(graphqlQuery, null, 2)}`);
-
           const headers = {
             Authorization: `Bearer ${accessToken}`,
             'JupiterOne-Account': accountId,
             'content-type': 'application/json',
           };
 
-          this.logger.info('📋 Request headers:', {
-            Authorization: 'Bearer [REDACTED]',
-            'JupiterOne-Account': accountId,
-            'content-type': 'application/json',
-          });
-
-          this.logger.info('📡 Making GraphQL request...');
           const graphqlRes = await this.helpers.httpRequest.call(this, {
             url: graphqlEndpoint,
             method: 'POST',
@@ -157,8 +140,6 @@ export class JupiterOneQuery implements INodeType {
             body: JSON.stringify(graphqlQuery),
             json: true,
           });
-
-          this.logger.info(`📥 GraphQL response received: ${JSON.stringify(graphqlRes, null, 2)}`);
 
           if (graphqlRes.errors) {
             this.logger.error(`❌ GraphQL errors: ${JSON.stringify(graphqlRes.errors)}`);
@@ -206,20 +187,12 @@ export class JupiterOneQuery implements INodeType {
           results = results.concat(pageResults);
           cursor = statusFile?.cursor || null;
 
-          this.logger.info(
-            `📊 Page ${page} results: ${pageResults.length}, total results: ${results.length}, cursor: ${cursor ? 'present' : 'null'}`,
-          );
-
           // Stop if no more results or we've reached the limit or no cursor
           if (!cursor || pageResults.length === 0 || results.length >= limit) {
-            this.logger.info(
-              `🛑 Stopping pagination: !cursor=${!cursor}, pageResults.length===0=${pageResults.length === 0}, results.length>=limit=${results.length >= limit}`,
-            );
             returnData.push({
               json: { results: results.slice(0, limit), limit, baseQuery },
               pairedItem: { item: i },
             });
-            this.logger.info('✅ Item processed successfully');
             break;
           }
         }
@@ -243,8 +216,6 @@ export class JupiterOneQuery implements INodeType {
         }
       }
     }
-
-    this.logger.info('🏁 JupiterOne Query Node: Execution completed');
     return [returnData];
   }
 }
